@@ -17,8 +17,16 @@ struct NFTVault {
 }
 
 contract FractionERC is ERC20 {
+    address operator;
+
     constructor(string memory _name, string memory _symbol, uint256 _supply) ERC20(_name, _symbol) {
         _mint(msg.sender, _supply);
+        operator = msg.sender;
+    }
+
+    function burn(address _from) public {
+        require(msg.sender == operator, "Only OPerator Can Perform this activity");
+        _burn(_from, balanceOf(_from));
     }
 }
 
@@ -68,6 +76,7 @@ contract FractionalNFT is IERC721Receiver {
         require(f.balanceOf(msg.sender) >= f.totalSupply(), "Not enough tokens");
         IERC721 nftC = IERC721(_nftAddress);
 
+        f.burn(msg.sender);
         nftC.safeTransferFrom(address(this), msg.sender, _tokenId);
     }
 
