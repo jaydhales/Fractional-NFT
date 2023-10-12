@@ -31,6 +31,16 @@ contract FractionERC is ERC20 {
 }
 
 contract FractionalNFT is IERC721Receiver {
+    event FractionCreated(
+        address indexed _nftAddress, uint256 indexed _tokenId, uint256 _totalWholeSupply, uint256 _pricePerUnit
+    );
+
+    event BoughtFraction(
+        address indexed _buyer, address indexed _fractionedERC, address indexed _nftAddress, uint256 _tokenId
+    );
+
+    event FractionClaimed(address indexed _nftAddress, uint256 indexed _tokenId);
+
     mapping(address => NFTVault[]) private vaults;
     mapping(address => mapping(uint256 => uint256)) vaultIndex;
     uint256 constant OPERATING_FEE = 1;
@@ -53,6 +63,8 @@ contract FractionalNFT is IERC721Receiver {
         vaults[_nftAddress].push(
             NFTVault(msg.sender, _nftAddress, _tokenId, block.timestamp, address(f), _pricePerUnit, _totalWholeSupply)
         );
+
+        emit FractionCreated(_nftAddress, _tokenId, _totalWholeSupply, _pricePerUnit);
     }
 
     function buyFraction(address _nftAddress, uint256 _tokenId) external payable {
@@ -67,6 +79,8 @@ contract FractionalNFT is IERC721Receiver {
         payable(operator).transfer(fee);
         payable(_vault.owner).transfer(msg.value - fee);
         f.transfer(msg.sender, units);
+
+        emit BoughtFraction(msg.sender, address(f), _nftAddress, _tokenId);
     }
 
     function withdrawNFTWithTotalSupply(address _nftAddress, uint256 _tokenId) public {
@@ -78,6 +92,8 @@ contract FractionalNFT is IERC721Receiver {
 
         f.burn(msg.sender);
         nftC.safeTransferFrom(address(this), msg.sender, _tokenId);
+
+        emit FractionClaimed(_nftAddress, _tokenId);
     }
 
     function getVault(address _nftAddress, uint256 _tokenId) public view returns (NFTVault memory) {
