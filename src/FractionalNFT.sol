@@ -40,7 +40,7 @@ contract FractionalNFT is IERC721Receiver {
         nftC.safeTransferFrom(msg.sender, address(this), _tokenId);
 
         vaultIndex[_nftAddress][_tokenId] = vaults[msg.sender].length;
-        FractionERC f = new FractionERC("Fractional NFT", "FNT", _totalWholeSupply * 10e18);
+        FractionERC f = new FractionERC("Fractional NFT", "FNT", _totalWholeSupply * 1e18);
 
         vaults[_nftAddress].push(
             NFTVault(msg.sender, _nftAddress, _tokenId, block.timestamp, address(f), _pricePerUnit, _totalWholeSupply)
